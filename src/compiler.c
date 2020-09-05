@@ -44,11 +44,11 @@ Token* compileMove(Compiler *compiler, Token *token, Token *limit) {
     while (token < limit) {
         switch (*token)
         {
-        case TOKEN_LEFT:
+        case TOKEN_RIGHT:
             totalChange++;\
             token++;
             continue;
-        case TOKEN_RIGHT:
+        case TOKEN_LEFT:
             totalChange--;
             token++;
             continue;
@@ -86,7 +86,11 @@ void push(JumpStack *stack, Operation *ptr) {
 }
 
 Operation* pop(JumpStack *stack) {
-    return stack->operation_ptrs[stack->current--];
+    if (stack->current == 0) {
+        return NULL;
+    }
+    stack->current--;
+    return stack->operation_ptrs[stack->current];
 }
 
 void freeStack(JumpStack *stack) {
@@ -106,8 +110,8 @@ void freeCompiler(Compiler *compiler) {
 }
 
 void compile(Compiler *compiler, Token *tokens, size_t tokenCount) {
-    JumpStack *forwardsStack;
-    initStack(forwardsStack);
+    JumpStack forwardsStack;
+    initStack(&forwardsStack);
     Token *token = tokens;
     Token* limit = tokens + tokenCount;
     while (token < tokens + tokenCount) {
@@ -131,28 +135,28 @@ void compile(Compiler *compiler, Token *tokens, size_t tokenCount) {
             break;
         case TOKEN_FORWARD:
             ;
-            Operation *operation = emitByteCode(compiler, OP_JUMP, token - tokens); // We put the current address as placeholder.
-            push(forwardsStack, operation);
+            Operation *operation = emitByteCode(compiler, OP_JUMP, compiler->operationCount); // We put the current address as placeholder.
+            push(&forwardsStack, operation);
             token++;
+            break;
         case TOKEN_BACKWARD:
             ;
-            Operation *corresponding = pop(forwardsStack); // We pop the matching [ from the stack.
+            Operation *corresponding = pop(&forwardsStack); // We pop the matching [ from the stack.
             if (corresponding == NULL) {
                 reportError("There is a ] without a matching [.");
             } else {
                 emitByteCode(compiler, OP_JUMP, corresponding->operand);
-                corresponding->operand = token - tokens; // We now found the corresponding ]'s location.
+                corresponding->operand = compiler->operationCount - 1; // We now found the corresponding ]'s location.
                 token++;
             }
+            break;
         default:
             break;
         }
     }
-    if (!isEmpty(forwardsStack)) {
+    if (!isEmpty(&forwardsStack)) {
         reportError("There is a [ without a matching ].");
     }
-    freeStack(forwardsStack);
-    free(token);
 }
 
 #undef CALCULATE_DELTA

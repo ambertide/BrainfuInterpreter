@@ -16,7 +16,7 @@ typedef enum {
 
 typedef struct {
     size_t tokenCount;
-    Token tokenJmpTable[51];
+    Token *tokenJmpTable;
 } Parser;
 
 /**

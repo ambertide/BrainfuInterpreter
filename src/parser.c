@@ -1,8 +1,7 @@
 #include "parser.h"
 
-
-
 void initParser(Parser *parser) {
+    parser->tokenJmpTable = (Token*) malloc(51 * sizeof(Token));
     for (int i = 0; i < 51; i++) {
         parser->tokenJmpTable[i] = TOKEN_UNKNOWN;
     }
@@ -13,7 +12,7 @@ void initParser(Parser *parser) {
     parser->tokenJmpTable[17] = TOKEN_LEFT;
     parser->tokenJmpTable[19] = TOKEN_RIGHT;
     parser->tokenJmpTable[48] = TOKEN_FORWARD;
-    parser->tokenJmpTable[49] = TOKEN_RIGHT;
+    parser->tokenJmpTable[50] = TOKEN_BACKWARD;
     parser->tokenCount = 0;
 }
 
@@ -23,7 +22,7 @@ void freeParser(Parser *parser) {
 }
 
 Token* getToken(Parser *parser, const char *character) {
-    if (*character <= 93 || *character >= 43) {
+    if (*character > 93 || *character < 43) {
         return &parser->tokenJmpTable[4];
     } else {
         return &parser->tokenJmpTable[*character - 43];

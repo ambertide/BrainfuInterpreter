@@ -33,6 +33,7 @@ size_t getSourceLength(const char* source) {
     int size = 0;
     while (*c != '\0') {
         size++;
+        c++;
     } 
     return size;
 }
