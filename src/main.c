@@ -34,35 +34,46 @@ void decompile(Compiler *compiler) {
     }
 }
 
-void runProgram(const char* source, bool debug) {
+void runProgram(const char* source, bool debug, Interpreter *interpreter) {
     size_t sourceLength = getSourceLength(source);
+    // Create necessary objects.
     Parser parser;
     Compiler compiler;
+    //Initialise stuff.
     initParser(&parser);
     initCompiler(&compiler);
+    // Parse and Compile.
     Token* tokens = parse(&parser, source, sourceLength);
     compile(&compiler, tokens, parser.tokenCount);
     if (debug) {
         decompile(&compiler);
     }
-    
+    // Interpret.
+    interpret(interpreter, &compiler);
+    // Free resources.
     freeCompiler(&compiler);
     freeParser(&parser);
 }
 
 void runFile(const char* fileName) {
     const char* source = getSource(fileName);
-    runProgram(source, true);
+    Interpreter interpreter;
+    initInterpreter(&interpreter);
+    runProgram(source, true, &interpreter);
+    freeInterpreter(&interpreter);
 }
 
 void repl() {
     printf("Brain-Fu Interpreter for Turing Machine\n\n");
     char *buffer = (char*) malloc(1024 * sizeof(char));
+    Interpreter interpreter;
+    initInterpreter(&interpreter);
     do {
         printf("λ: ");
         scanf("%s", buffer);
-        runProgram(buffer, true);
+        runProgram(buffer, true, &interpreter);
     } while(buffer[0] != 'q');
+    freeInterpreter(&interpreter);
 }
 
 int main(int argc, char* argv[]) {

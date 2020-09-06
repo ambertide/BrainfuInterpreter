@@ -58,6 +58,9 @@ typedef struct {
     };
 } Interpreter;
 
+void initInterpreter(Interpreter *interpreter);
+void freeInterpreter(Interpreter *Interpreter);
+
 extern void cacheCell(Interpreter *interpreter);
 extern uint8_t getCurrentValue(Interpreter *interpreter);
 extern void modifyCurrentValue(Interpreter *interpreter, int modifier);

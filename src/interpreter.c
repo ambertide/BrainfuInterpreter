@@ -142,6 +142,18 @@ inline Operation *jump(Interpreter *interpreter, Operation *localPointer, Operat
     }
 }
 
+void initInterpreter(Interpreter *interpreter) {
+    interpreter->isCached = false;
+    interpreter->currentIndex = 0;
+    Tape tape;
+    initTape(&tape);
+    interpreter->tape = &tape;
+}
+
+void freeInterpreter(Interpreter *interpreter) {
+    freeTape(interpreter->tape);
+}
+
 void interpret(Interpreter *interpreter, Compiler *compiler) {
     Operation* opPointer = compiler->operations;
     Operation* limit = opPointer + compiler->operationCapacity;
