@@ -146,8 +146,8 @@ void compile(Compiler *compiler, Token *tokens, size_t tokenCount) {
             } else {
                 emitByteCode(compiler, OP_JUMP, corresponding->operand);
                 corresponding->operand = compiler->operationCount - 1; // We now found the corresponding ]'s location.
-                token++;
             }
+            token++;
             break;
         default:
             break;

@@ -1,7 +1,8 @@
 #include "common.h"
 #include "parser.h"
 #include "compiler.h"
-#include <stdio.h>
+#include "interpreter.h"
+
 
 void printOperation(Operation *operation) {
     switch(operation->op_code) {
@@ -44,6 +45,7 @@ void runProgram(const char* source, bool debug) {
     if (debug) {
         decompile(&compiler);
     }
+    
     freeCompiler(&compiler);
     freeParser(&parser);
 }
