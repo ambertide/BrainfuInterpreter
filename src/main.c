@@ -44,6 +44,8 @@ void runProgram(const char* source, bool debug) {
     if (debug) {
         decompile(&compiler);
     }
+    freeCompiler(&compiler);
+    freeParser(&parser);
 }
 
 void runFile(const char* fileName) {

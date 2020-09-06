@@ -18,7 +18,6 @@ void initParser(Parser *parser) {
 
 void freeParser(Parser *parser) {
     free(parser->tokenJmpTable);
-    free(parser);
 }
 
 Token* getToken(Parser *parser, const char *character) {

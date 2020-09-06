@@ -106,7 +106,6 @@ void initCompiler(Compiler *compiler) {
 
 void freeCompiler(Compiler *compiler) {
     free(compiler->operations);
-    compiler->operationCount;
 }
 
 void compile(Compiler *compiler, Token *tokens, size_t tokenCount) {
