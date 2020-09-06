@@ -25,7 +25,7 @@ const char* getSource(const char* fileName) {
 }
 
 void reportError(const char* error) {
-    fprintf(stderr, "%s", error);
+    fprintf(stderr, "%s\n", error);
 }
 
 size_t getSourceLength(const char* source) {

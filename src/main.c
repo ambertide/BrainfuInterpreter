@@ -6,30 +6,29 @@
 void printOperation(Operation *operation) {
     switch(operation->op_code) {
         case 0:
-            printf("OP_CHANGE\t\t");
+            printf("OP_CHANGE\t\t%i\n", operation->operand);
             break;
         case 1:
-            printf("OP_INPUT \t\t");
+            printf("OP_INPUT \t\t%i\n", operation->operand);
             break;
         case 2:
-            printf("OP_OUTPUT\t\t");
+            printf("OP_OUTPUT\t\t%i\n", operation->operand);
             break;
         case 3:
-            printf("OP_JUMP  \t\t");
+            printf("OP_JUMP  \t\t%04X\n", operation->operand);
             break;
         case 4:
-            printf("OP_MOVE  \t\t");
+            printf("OP_MOVE  \t\t%i\n", operation->operand);
             break;
         default:
             printf("UNDEFINED");
             break;
     }
-    printf("%i\n", operation->operand);
 }
 
 void decompile(Compiler *compiler) {
     for (int i = 0; i < compiler->operationCount; i++) {
-        printf("%08lx\t", &compiler->operations[i] - compiler->operations);
+        printf("%04lX\t", &compiler->operations[i] - compiler->operations);
         printOperation(&compiler->operations[i]);
     }
 }
