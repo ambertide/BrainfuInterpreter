@@ -46,8 +46,7 @@ int getIndex(Tape *tape, int index);
 Cell *get(Tape *tape, int index);
 uint8_t getValue(Tape *tape, int index);
 bool isOnTape(Tape *tape, int index);
-void *add(Tape *tape, int index, uint8_t value);
-
+bool add(Tape *tape, int index, uint8_t value);
 
 typedef struct {
     Tape *tape;
@@ -59,13 +58,13 @@ typedef struct {
 } Interpreter;
 
 void initInterpreter(Interpreter *interpreter);
-void freeInterpreter(Interpreter *Interpreter);
+void freeInterpreter(Interpreter *interpreter);
 
 extern void cacheCell(Interpreter *interpreter);
 extern uint8_t getCurrentValue(Interpreter *interpreter);
 extern void modifyCurrentValue(Interpreter *interpreter, int modifier);
 extern void moveOnTape(Interpreter *Interpreter, int movement);
-extern Operation* jump(Interpreter *interpreter, Operation *localPointer, Operation *basePointer, int jumpTo);
+extern Operation** jump(Interpreter *interpreter, Operation **localPointer, Operation **basePointer, int jumpTo);
 void interpret(Interpreter *interpreter, Compiler *compiler);
 
 #endif

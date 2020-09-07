@@ -22,7 +22,7 @@ void printOperation(Operation *operation) {
             printf("OP_MOVE  \t\t%i\n", operation->operand);
             break;
         default:
-            printf("UNDEFINED");
+            printf("UNDEFINED\n");
             break;
     }
 }
@@ -30,7 +30,7 @@ void printOperation(Operation *operation) {
 void decompile(Compiler *compiler) {
     for (int i = 0; i < compiler->operationCount; i++) {
         printf("%04lX\t", &compiler->operations[i] - compiler->operations);
-        printOperation(&compiler->operations[i]);
+        printOperation(compiler->operations[i]);
     }
 }
 
@@ -59,7 +59,7 @@ void runFile(const char* fileName) {
     const char* source = getSource(fileName);
     Interpreter interpreter;
     initInterpreter(&interpreter);
-    runProgram(source, true, &interpreter);
+    runProgram(source, false, &interpreter);
     freeInterpreter(&interpreter);
 }
 

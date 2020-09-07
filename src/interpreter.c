@@ -4,6 +4,7 @@ int getIndex(Tape *tape, int index) {
     return index % tape->capacity;
 }
 
+
 /**
  * Fill a tape with
  * "empty" Cells, an empty cell
@@ -12,8 +13,10 @@ int getIndex(Tape *tape, int index) {
  */
 void fillTape(Tape *tape) {
     for (Cell *cell = tape->cells; cell < tape->cells + tape->capacity; cell++) {
-        cell->index = -1;
-        cell->value = 0;
+        Cell *newCell = malloc(sizeof(Cell));
+        newCell->index = -1;
+        newCell->value = 0;
+        *cell = *newCell;
     }
 }
 
@@ -39,17 +42,17 @@ Cell *get(Tape *tape, int index) {
     return NULL;
 }
 
+bool isOnTape(Tape *tape, int index) {
+    return get(tape, index) != NULL;
+}
+
 uint8_t getValue(Tape *tape, int index) {
-    if (!isOnTape) {
+    if (!isOnTape(tape, index)) {
         return 0;
     } else {
         return get(tape, index)->value;
     }
 }
-
-bool isOnTape(Tape *tape, int index) {
-    return get(tape, index) != NULL;
-};
 
 
 inline float getLoadFactor(Tape *tape) {
@@ -66,18 +69,21 @@ void copyTape(Tape *origin, Tape *destination) {
 
 void increaseTape(Tape *tape) {
     Cell *newCells = (Cell *) malloc(tape->capacity * 2 * sizeof(Cell *));
-    Tape *newTape;
+    Tape *newTape = (Tape *) malloc(sizeof(Tape));
     newTape->capacity = tape->capacity * 2;
     newTape->current =  0;
-    newTape->cells = newCells;;
+    newTape->cells = newCells;
     fillTape(newTape);
     copyTape(tape, newTape);
+    freeTape(tape);
     *tape = *newTape;
 }
 
-void *add(Tape *tape, int index, uint8_t value) {
+bool add(Tape *tape, int index, uint8_t value) {
+    bool increased = false;
     if (getLoadFactor(tape) > 0.75) {
         increaseTape(tape);
+        increased = true;
     }
     int lookAt = getIndex(tape, index); // Where to start looking at.
     Cell* cell = tape->cells + lookAt; // Traversing cell pointer.
@@ -85,13 +91,16 @@ void *add(Tape *tape, int index, uint8_t value) {
     while (cell < limit && cell->index != -1) {
         cell++;
     }
-    if (cell < limit) { // If we couldn't find a slot.
+    if (cell == limit) { // If we couldn't find a slot.
         increaseTape(tape); // Increase the tape.
         add(tape, index, value); // Try adding it again.
+        increased = true;
     } else { // Otherwise, we must have found an empty spot!
         cell->index = index;
         cell->value = value; // Add the new cell.
+        tape->current++;
     }
+    return increased;
 }
 
 inline void cacheCell(Interpreter *interpreter) {
@@ -131,11 +140,10 @@ inline void moveOnTape(Interpreter *interpreter, int movement) {
     interpreter->currentIndex = newIndex;  // Get to the new index.
 }
 
-inline Operation *jump(Interpreter *interpreter, Operation *localPointer, Operation *basePointer, int address) {
-    long offset = localPointer - basePointer;
-    if (address < offset && getCurrentValue(interpreter) != 0) { // Means a backward jump ].
-        return basePointer + address;
-    } else if (address > offset && getCurrentValue(interpreter) == 0) {
+inline Operation **jump(Interpreter *interpreter, Operation **localPointer, Operation **basePointer, int address) {
+    unsigned long offset = (localPointer - basePointer);
+    if ((address < offset && getCurrentValue(interpreter) != 0)
+        || (address > offset && getCurrentValue(interpreter) == 0)) { // Means a backward jump ].
         return basePointer + address;
     } else {
         return localPointer;
@@ -145,9 +153,9 @@ inline Operation *jump(Interpreter *interpreter, Operation *localPointer, Operat
 void initInterpreter(Interpreter *interpreter) {
     interpreter->isCached = false;
     interpreter->currentIndex = 0;
-    Tape tape;
-    initTape(&tape);
-    interpreter->tape = &tape;
+    Tape *tape = (Tape*) malloc(sizeof(Tape));
+    initTape(tape);
+    interpreter->tape = tape;
 }
 
 void freeInterpreter(Interpreter *interpreter) {
@@ -155,22 +163,24 @@ void freeInterpreter(Interpreter *interpreter) {
 }
 
 void interpret(Interpreter *interpreter, Compiler *compiler) {
-    Operation* opPointer = compiler->operations;
-    Operation* limit = opPointer + compiler->operationCapacity;
+    Operation** opPointer = compiler->operations;
+    Operation** limit = opPointer + compiler->operationCount;
+    Operation *currentOperation;
     while (opPointer < limit) {
-        switch (opPointer->op_code)
+        currentOperation = *opPointer;
+        switch (currentOperation->op_code)
         {
         case OP_OUTPUT:
             printf("%c", getCurrentValue(interpreter));
             break;
         case OP_MOVE:
-            moveOnTape(interpreter, opPointer->operand);
+            moveOnTape(interpreter, currentOperation->operand);
             break;
         case OP_JUMP:
-            opPointer = jump(interpreter, opPointer, compiler->operations, opPointer->operand);
+            opPointer = jump(interpreter, opPointer, compiler->operations, currentOperation->operand);
             break;
         case OP_CHANGE:
-            modifyCurrentValue(interpreter, opPointer->operand);
+            modifyCurrentValue(interpreter, currentOperation->operand);
             break;
         case OP_INPUT:
             break;
@@ -178,5 +188,6 @@ void interpret(Interpreter *interpreter, Compiler *compiler) {
             reportError("Unexpected operation bytecode.");
             break;
         }
+        opPointer++;
     }
 }

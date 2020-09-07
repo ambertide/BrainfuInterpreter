@@ -24,12 +24,12 @@ typedef struct
 {
     int capacity;
     int current;
-    Operation **operation_ptrs;
+    Operation **operationPointers;
 } JumpStack;
 
 void initStack(JumpStack *stack);
 void push(JumpStack *stack, Operation *ptr);
-Operation* pop(JumpStack *stack);
+Operation *pop(JumpStack *stack);
 /**
  * Free the stack.
  */
@@ -47,7 +47,7 @@ bool isEmpty(JumpStack *stack);
 typedef struct {
     int operationCount;
     int operationCapacity;
-    Operation *operations;
+    Operation **operations;
 } Compiler;
 
 /**
@@ -63,7 +63,7 @@ typedef struct {
 Operation* emitByteCode(Compiler *compiler, ByteCode byteCode, int operand);
 
 void initCompiler(Compiler *compiler);
-void freeCompiler(Compiler *complier);
+void freeCompiler(Compiler *compiler);
 void compile(Compiler *compiler, Token *tokens, size_t tokenCount);
 
 #endif

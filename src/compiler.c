@@ -4,12 +4,14 @@
 Operation *emitByteCode(Compiler *compiler, ByteCode byteCode, int operand) {
     if (compiler->operationCount == compiler->operationCapacity) {
         compiler->operationCapacity *= 2; // Resize the dynamic array.
-        compiler->operations = (Operation*) realloc(compiler->operations, (compiler->operationCapacity * sizeof(Operation)));
+        compiler->operations = (Operation**) realloc(compiler->operations, (compiler->operationCapacity * sizeof(Operation*)));
     }
-    compiler->operations[compiler->operationCount].op_code = byteCode;
-    compiler->operations[compiler->operationCount].operand = operand;
+    Operation *newOperation = malloc(sizeof(Operation));
+    newOperation->op_code = byteCode;
+    newOperation->operand = operand;
+    *(compiler->operations + compiler->operationCount) = newOperation;
     compiler->operationCount++;
-    return &compiler->operations[compiler->operationCount - 1];
+    return newOperation;
 }
 
 
@@ -66,13 +68,13 @@ Token* compileMove(Compiler *compiler, Token *token, Token *limit) {
 void initStack(JumpStack *stack) {
     stack->capacity = 8;
     stack->current = 0;
-    stack->operation_ptrs = (Operation**) malloc(stack->capacity * sizeof(Operation*));
+    stack->operationPointers = (Operation**) malloc(stack->capacity * sizeof(Operation*));
 }
 
 void checkStackSize(JumpStack *stack) {
     if (stack->current == stack->capacity) {
         stack->capacity *= 2;
-        stack->operation_ptrs = (Operation**) realloc(stack->operation_ptrs, stack->capacity * sizeof(Operation*));
+        stack->operationPointers = (Operation**) realloc(stack->operationPointers, stack->capacity * sizeof(Operation*));
     }
 }
 
@@ -82,7 +84,7 @@ bool isEmpty(JumpStack *stack) {
 
 void push(JumpStack *stack, Operation *ptr) {
     checkStackSize(stack);
-    stack->operation_ptrs[stack->current++] = ptr;
+    stack->operationPointers[stack->current++] = ptr;
 }
 
 Operation* pop(JumpStack *stack) {
@@ -90,18 +92,17 @@ Operation* pop(JumpStack *stack) {
         return NULL;
     }
     stack->current--;
-    return stack->operation_ptrs[stack->current];
+    return stack->operationPointers[stack->current];
 }
 
 void freeStack(JumpStack *stack) {
-    free(stack->operation_ptrs);
-    free(stack);
+    free(stack->operationPointers);
 }
 
 void initCompiler(Compiler *compiler) {
     compiler->operationCapacity = 8;
     compiler->operationCount = 0;
-    compiler->operations = (Operation*) malloc(compiler->operationCapacity * sizeof(Operation*));
+    compiler->operations = (Operation**) malloc(compiler->operationCapacity * sizeof(Operation*));
 }
 
 void freeCompiler(Compiler *compiler) {

@@ -1,2 +1,4 @@
 build/
 mandelbrot.bf
+.idea/
+cmake-build-debug/
