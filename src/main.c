@@ -1,3 +1,4 @@
+#include <string.h>
 #include "common.h"
 #include "parser.h"
 #include "compiler.h"
@@ -66,13 +67,17 @@ void runFile(const char* fileName) {
 void repl() {
     printf("Brain-Fu Interpreter for Turing Machine\n\n");
     char *buffer = (char*) malloc(1024 * sizeof(char));
+    bool debug = false;
     Interpreter interpreter;
     initInterpreter(&interpreter);
     do {
         printf("λ: ");
         scanf("%s", buffer);
-        runProgram(buffer, true, &interpreter);
-    } while(buffer[0] != 'q');
+        runProgram(buffer, debug, &interpreter);
+        if (*buffer == 'd') {
+            debug = !debug;
+        }
+    } while(*buffer != 'q');
     freeInterpreter(&interpreter);
 }
 
