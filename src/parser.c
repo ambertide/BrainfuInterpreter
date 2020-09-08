@@ -1,41 +1,63 @@
 #include "parser.h"
 
 void initParser(Parser *parser) {
-    parser->tokenJmpTable = (Token*) malloc(51 * sizeof(Token));
-    for (int i = 0; i < 51; i++) {
-        parser->tokenJmpTable[i] = TOKEN_UNKNOWN;
-    }
-    parser->tokenJmpTable[0] = TOKEN_INCREMENT;
-    parser->tokenJmpTable[1] = TOKEN_INPUT;
-    parser->tokenJmpTable[2] = TOKEN_DECREMENT;
-    parser->tokenJmpTable[3] = TOKEN_OUTPUT;
-    parser->tokenJmpTable[17] = TOKEN_LEFT;
-    parser->tokenJmpTable[19] = TOKEN_RIGHT;
-    parser->tokenJmpTable[48] = TOKEN_FORWARD;
-    parser->tokenJmpTable[50] = TOKEN_BACKWARD;
+    parser->input = (InputQueue *) malloc(sizeof(InputQueue));
+    initInputQueue(parser->input);
     parser->tokenCount = 0;
 }
 
 void freeParser(Parser *parser) {
-    free(parser->tokenJmpTable);
+    free(parser->input);
 }
 
-Token* getToken(Parser *parser, const char *character) {
-    if (*character > 93 || *character < 43) {
-        return &parser->tokenJmpTable[4];
-    } else {
-        return &parser->tokenJmpTable[*character - 43];
+inline Token getToken(char character) {
+    switch (character) {
+        case '>':
+            return TOKEN_RIGHT;
+        case '<':
+            return TOKEN_LEFT;
+        case '+':
+            return TOKEN_INCREMENT;
+        case '-':
+            return TOKEN_DECREMENT;
+        case '.':
+            return TOKEN_OUTPUT;
+        case ',':
+            return TOKEN_INPUT;
+        case '[':
+            return TOKEN_FORWARD;
+        case ']':
+            return TOKEN_BACKWARD;
+        case '!':
+            return TOKEN_INPUT_SEPARATOR;
+        default:
+            return TOKEN_UNKNOWN;
     }
 }
 
 Token* parse(Parser *parser, const char* sourceCode, size_t length) {
     Token* tokens = (Token*) malloc(length * sizeof(Token));
     int tokenCount = 0;
-    for (int i = 0; i < length; i++) {
-        Token *token = getToken(parser, &sourceCode[i]);
-        if (*token != TOKEN_UNKNOWN) {
-            tokens[tokenCount++] = *token; 
+    char *c = (char *) sourceCode;
+    Token currentToken;
+    int parsedCharacters = 0;
+    while (*c != '\0') {
+        currentToken = getToken(*c);
+        c++;
+        if (currentToken == TOKEN_UNKNOWN) {
+            parsedCharacters++;
+            continue; // Ignore unknown characters.
+        } else if(currentToken == TOKEN_INPUT_SEPARATOR) {
+            char copyBuffer[parsedCharacters + 1];
+            memcpy(copyBuffer, sourceCode, parsedCharacters); // Copy the characters up until \0.
+            copyBuffer[parsedCharacters] = '\0'; // Set this to terminate string properly.
+            enqueueInput(parser->input, copyBuffer, parsedCharacters + 1); // Enqueue the input.
+            tokenCount = 0; // Since those that came before were not real tokens, we start over.
+        } else {
+            *(tokens + tokenCount) = currentToken; // Otherwise attempt the token.
+            tokenCount++;
         }
+        parsedCharacters++;
     }
     tokens = realloc(tokens, (tokenCount) * sizeof(Token));
     parser->tokenCount = tokenCount;

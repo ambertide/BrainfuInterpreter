@@ -62,9 +62,13 @@ void freeInterpreter(Interpreter *interpreter);
 
 extern void cacheCell(Interpreter *interpreter);
 extern uint8_t getCurrentValue(Interpreter *interpreter);
+
 extern void modifyCurrentValue(Interpreter *interpreter, int modifier);
+extern void setCurrentValue(Interpreter *interpreter, int value);
 extern void moveOnTape(Interpreter *Interpreter, int movement);
 extern Operation** jump(Interpreter *interpreter, Operation **localPointer, Operation **basePointer, int jumpTo);
-void interpret(Interpreter *interpreter, Compiler *compiler);
+extern char getInput(Parser *parser);
+
+void interpret(Interpreter *interpreter, Compiler *compiler, Parser *parser);
 
 #endif

@@ -47,10 +47,13 @@ void runProgram(const char* source, bool debug, Interpreter *interpreter) {
     Token* tokens = parse(&parser, source, sourceLength);
     compile(&compiler, tokens, parser.tokenCount);
     if (debug) {
+        if (!isQueueEmpty(parser.input)) {
+            printf("Input is: %s\n", parser.input->input);
+        }
         decompile(&compiler);
     }
     // Interpret.
-    interpret(interpreter, &compiler);
+    interpret(interpreter, &compiler, &parser);
     // Free resources.
     freeCompiler(&compiler);
     freeParser(&parser);
@@ -65,13 +68,13 @@ void runFile(const char* fileName) {
 }
 
 void repl() {
-    printf("Brain-Fu Interpreter for Turing Machine\n\n");
+    printf("Brain-Fu Interpreter for Turing Machine\n");
     char *buffer = (char*) malloc(1024 * sizeof(char));
     bool debug = false;
     Interpreter interpreter;
     initInterpreter(&interpreter);
     do {
-        printf("λ: ");
+        printf("\nλ: ");
         scanf("%s", buffer);
         runProgram(buffer, debug, &interpreter);
         if (*buffer == 'd') {

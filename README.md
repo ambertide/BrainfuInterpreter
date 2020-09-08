@@ -35,8 +35,8 @@ looping in the code itself and input/output.
 |   [     | Jump forward to the command after the matching `]` character if the cell pointer value is  0. |
 |   ]     | Jump back to the command after the matching `[` character if the cell pointer value is not zero. |
 |   .     | Output the ASCII value of the character at cell pointer to the `stdout` |
-|   ,     | Get a character from `stdin` and write its value to the cell pointer† |
-|   !     | A special macro, characters entered before `!` are taken as input†. |
+|   ,     | Get a character from `stdin` and write its value to the cell pointer. |
+|   !     | A special macro, characters entered before `!` are taken as input. |
 
 † Feature not yet implemented.
 

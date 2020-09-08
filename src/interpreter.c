@@ -116,14 +116,18 @@ inline uint8_t getCurrentValue(Interpreter *interpreter) {
     }
 }
 
-inline void modifyCurrentValue(Interpreter *interpreter, int modifier) {
+inline void setCurrentValue(Interpreter *interpreter, int value) {
     if (!interpreter->isCached) { // If the object isn't cached
         if (!isOnTape(interpreter->tape, interpreter->currentIndex)) { // but first If the cell isn't created yet.
             add(interpreter->tape, interpreter->currentIndex, 0); // Create it.
         }
         cacheCell(interpreter); // [then] Cache it
     }
-    interpreter->cachedCell->value += modifier; //  Modify its value.
+    interpreter->cachedCell->value = value; //  Modify its value.
+}
+
+inline void modifyCurrentValue(Interpreter *interpreter, int modifier) {
+    setCurrentValue(interpreter, getCurrentValue(interpreter) + modifier);
 }
 
 inline void moveOnTape(Interpreter *interpreter, int movement) {
@@ -150,6 +154,16 @@ inline Operation **jump(Interpreter *interpreter, Operation **localPointer, Oper
     }
 }
 
+inline char getInput(Parser *parser) {
+    char c;
+    if (isQueueEmpty(parser->input)) {
+        scanf(" %c", &c);
+    } else {
+        c = dequeue(parser->input);
+    }
+    return c;
+}
+
 void initInterpreter(Interpreter *interpreter) {
     interpreter->isCached = false;
     interpreter->currentIndex = 0;
@@ -162,7 +176,7 @@ void freeInterpreter(Interpreter *interpreter) {
     freeTape(interpreter->tape);
 }
 
-void interpret(Interpreter *interpreter, Compiler *compiler) {
+void interpret(Interpreter *interpreter, Compiler *compiler, Parser *parser) {
     Operation** opPointer = compiler->operations;
     Operation** limit = opPointer + compiler->operationCount;
     Operation *currentOperation;
@@ -183,6 +197,7 @@ void interpret(Interpreter *interpreter, Compiler *compiler) {
             modifyCurrentValue(interpreter, currentOperation->operand);
             break;
         case OP_INPUT:
+            setCurrentValue(interpreter, getInput(parser));
             break;
         default:
             reportError("Unexpected operation bytecode.");
