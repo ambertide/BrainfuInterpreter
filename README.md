@@ -1,7 +1,7 @@
 # Brainfu Interpreter
 
 Brainfu is an optimizing bytecode interpreter for the esoteric programming language
-Brainfuck, it has an interactive REPL mode, error reporting (work in progress) it can
+Brainf, it has an interactive REPL mode, error reporting (work in progress) it can
 also run files.
 
 ## Usage
